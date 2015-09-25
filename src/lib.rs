@@ -8,6 +8,7 @@
 //! 3. Ignore common text editor and revision control backup files
 //! 4. Select only files or only directories
 //! 5. Simpler but detailed enough error handling
+//! 6. Recursive directory scanner
 //!
 //! For example you can read all subdirectories this way:
 //!
@@ -88,14 +89,31 @@
 //! but we want to know exact file name where error occured so we store it
 //! in the error inside the lambda.
 //!
+//! Recursive scanner works much the same, except (a) iterator yields items
+//! recursively, in depth-first order. and (b) list of errors returned instead
+//! of single error. For example:
+//!
+//! ```rust
+//! use scan_dir::ScanDir;
+//!
+//! let all_rs_files: Vec<_> = ScanDir::files().walk(".", |iter| {
+//!     iter.filter(|&(_, ref name)| name.ends_with(".rs"))
+//!         .map(|(ref entry, _)| entry.path())
+//!         .collect()
+//! }).unwrap();
+//! ```
+//!
 #[macro_use] extern crate quick_error;
 
 use std::io;
 use std::path::{PathBuf, Path};
 
 mod iter;
+mod walk;
+mod filter;
 
 pub use iter::Iter;
+pub use walk::Walker;
 
 
 quick_error! {
@@ -211,11 +229,15 @@ impl ScanDir {
 
     /// Calls a closure with an iterator over pairs of (entry, name)
     ///
-    /// The method returns either error produced by scan_dir or Result
-    /// returned by closure itself. The scan_dir::Error must be convertible
-    /// to error produced by closure.
+    /// Note when it comes to error reporting, here is how errors are
+    /// prioritized:
     ///
-    /// Example:
+    /// 1. If there is scan_dir error it has priority over result/error of
+    ///    the closure
+    /// 2. The `Io` error have more priority over `Decode` error
+    /// 3. Otherwise first received error is returned if there are multiple
+    ///
+    /// # Example
     ///
     /// ```rust
     /// use scan_dir::ScanDir;
@@ -234,5 +256,45 @@ impl ScanDir {
         let mut dir_res = Ok(());
         let user_res = f(iter::new(self, &mut dir_res, path.as_ref()));
         dir_res.and(Ok(user_res))
+    }
+
+    /// Calls a closure with recursive walker over the directory
+    ///
+    /// The recursive walker continues to work even if error occured and
+    /// returns a list of the errors in the case at least one error takes
+    /// place. You may put some mutable variable on the stack and
+    /// put the result of the closure there, in case you need to tolerate
+    /// errors.
+    ///
+    /// # Example
+    ///
+    /// This is an example walker which tolerates errors
+    ///
+    /// ```rust
+    /// use scan_dir::ScanDir;
+    ///
+    /// let mut all_files = Vec::new();
+    /// let walk_result = ScanDir::files().walk(".", |iter| {
+    ///     for (entry, name) in iter {
+    ///         all_files.push(entry.path());
+    ///     }
+    /// });
+    /// if let Err(errors) = walk_result {
+    ///     for e in errors {
+    ///         println!("Error {}. Continue scanning...", e);
+    ///     }
+    /// }
+    /// ```
+    pub fn walk<P:AsRef<Path>, R:Sized, F>(&self, path: P, f: F)
+        -> Result<R, Vec<Error>>
+        where F: FnOnce(Walker) -> R
+    {
+        let mut errors = Vec::new();
+        let user_res = f(walk::new(self, &mut errors, path.as_ref()));
+        if errors.len() > 0 {
+            Err(errors)
+        } else {
+            Ok(user_res)
+        }
     }
 }

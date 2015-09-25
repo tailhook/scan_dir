@@ -15,6 +15,7 @@ Features:
 3. Ignore common text editor and revision control backup files
 4. Select only files or only directories
 5. Simpler but detailed enough error handling
+6. Recursive directory scanner
 
 Here is the example:
 

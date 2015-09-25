@@ -1,7 +1,8 @@
 [package]
 name = "scan_dir"
 description = """
-    A easier read_dir, useful for reading directory of config files
+    A easier read_dir and recursive directory walker,
+    useful for reading directory of config files
 """
 version = "0.1.0"
 keywords = ["dir", "directory", "glob", "read_dir", "walk"]
