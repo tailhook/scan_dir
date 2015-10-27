@@ -14,8 +14,12 @@ pub fn matches(s: &ScanDir, entry: &DirEntry, name: &String)
     }
     if s.skip_dirs || s.skip_files {
         let mut typ = try!(entry.file_type());
-        if typ.is_symlink() && !s.skip_symlinks {
-            typ = try!(metadata(entry.path())).file_type();
+        if typ.is_symlink() {
+            if s.skip_symlinks {
+                return Ok(false);
+            } else {
+                typ = try!(metadata(entry.path())).file_type();
+            }
         }
         if s.skip_dirs && typ.is_dir() {
             return Ok(false);
