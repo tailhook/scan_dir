@@ -1,5 +1,5 @@
 use std::io;
-use std::fs::DirEntry;
+use std::fs::{DirEntry, metadata};
 
 use {ScanDir};
 
@@ -13,7 +13,10 @@ pub fn matches(s: &ScanDir, entry: &DirEntry, name: &String)
         return Ok(false);
     }
     if s.skip_dirs || s.skip_files {
-        let typ = try!(entry.file_type());
+        let mut typ = try!(entry.file_type());
+        if typ.is_symlink() && !s.skip_symlinks {
+            typ = try!(metadata(entry.path())).file_type();
+        }
         if s.skip_dirs && typ.is_dir() {
             return Ok(false);
         }

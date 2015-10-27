@@ -48,3 +48,13 @@ Compare it to stdlib way:
 
 Well, it looks almost fine until you want to turn unwrap's into correct
 error reporting.
+
+
+Upgrading
+=========
+
+The ``scan_dir`` 0.3 by default resolves symlink before checking if it's a file
+or directory. In the ``scan_dir`` 0.1-0.2 symlinks where always included in the
+list (i.e. they were skipped neither by ``skip_files`` nor by
+``skip_dirs``).
+

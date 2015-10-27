@@ -6,7 +6,7 @@
 //!    (or error/warning is propagated)
 //! 2. Ignore hidden entries (by default)
 //! 3. Ignore common text editor and revision control backup files
-//! 4. Select only files or only directories
+//! 4. Select only files or only directories (and resolve symlinks)
 //! 5. Simpler but detailed enough error handling
 //! 6. Recursive directory scanner
 //!
@@ -148,6 +148,7 @@ pub struct ScanDir {
     skip_dirs: bool,
     skip_files: bool,
     skip_backup: bool,
+    skip_symlinks: bool,
 }
 
 impl ScanDir {
@@ -160,6 +161,7 @@ impl ScanDir {
             skip_dirs: false,
             skip_files: false,
             skip_backup: false,
+            skip_symlinks: false,
         }
     }
     /// Constructs a settings which only iterates over files (non-directories).
@@ -171,6 +173,7 @@ impl ScanDir {
             skip_dirs: true,
             skip_files: false,
             skip_backup: true,
+            skip_symlinks: false,
         }
     }
     /// Constructs a settings which only iterates over directories
@@ -182,6 +185,7 @@ impl ScanDir {
             skip_dirs: false,
             skip_files: true,
             skip_backup: true,
+            skip_symlinks: false,
         }
     }
 
@@ -203,6 +207,19 @@ impl ScanDir {
     /// Skip file (non-directory) entries
     pub fn skip_files(&mut self, flag: bool) -> &mut ScanDir {
         self.skip_files = flag;
+        self
+    }
+
+    /// Skip symlinks
+    ///
+    /// By default symlinks are resolve if either skip_dirs or skip_files
+    /// are enabled. So symlink is treated just like entry it points to.
+    /// This method allows to avoid stat call and skip symlinks at all.
+    ///
+    /// If neither `skip_files` nor `skip_dirs` is enabled the symlink is
+    /// never resolved and is returned just like any other directory entry.
+    pub fn skip_symlinks(&mut self, flag: bool) -> &mut ScanDir {
+        self.skip_symlinks = flag;
         self
     }
 
