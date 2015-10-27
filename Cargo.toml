@@ -4,13 +4,12 @@ description = """
     A easier read_dir and recursive directory walker,
     useful for reading directory of config files
 """
-version = "0.2.0"
+version = "0.3.0"
 keywords = ["dir", "directory", "glob", "read_dir", "walk"]
 authors = ["Paul Colomiets <paul@colomiets.name>"]
 documentation = "http://tailhook.github.com/scan_dir/"
 homepage = "http://github.com/tailhook/scan_dir"
 license = "MIT"
-license-file = "LICENSE"
 
 [dependencies]
 quick-error = '0.1.3'
