@@ -240,7 +240,7 @@ impl ScanDir {
     /// * `*~` -- vim/emacs/other backup files
     /// * `#*#` -- emacs auto save
     pub fn skip_backup(&mut self, flag: bool) -> &mut ScanDir {
-        self.skip_files = flag;
+        self.skip_backup = flag;
         self
     }
 
