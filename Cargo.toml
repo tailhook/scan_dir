@@ -9,7 +9,7 @@ keywords = ["dir", "directory", "glob", "read_dir", "walk"]
 authors = ["Paul Colomiets <paul@colomiets.name>"]
 documentation = "http://tailhook.github.com/scan_dir/"
 homepage = "http://github.com/tailhook/scan_dir"
-license = "MIT"
+license = "MIT/Apache-2.0"
 
 [dependencies]
 quick-error = '1.0.0'
