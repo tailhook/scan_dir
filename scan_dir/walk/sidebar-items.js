@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Walker","Iterator over pairs of (DirEntry, String) where latter is the file name"]]});

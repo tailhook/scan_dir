@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Error","Error type for scan dir"]],"struct":[["Iter","Iterator over pairs of (DirEntry, String) where latter is the file name"],["ScanDir","Settings for directory walker"],["Walker","Iterator over pairs of (DirEntry, String) where latter is the file name"]]});
