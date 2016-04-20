@@ -39,6 +39,42 @@ pub fn new<'x>(settings: &'x ScanDir, errors: &'x mut Vec<Error>,
     }
 }
 
+impl<'a> Walker<'a> {
+    /// Premature exit from directory that we are currently scanning
+    ///
+    /// This is useful for skipping certain directories. For directories
+    /// which are emitted from the iterator the walker is considered to be
+    /// inside the directory.
+    ///
+    /// You need to use `while let Some(..) = iter.next()` form (instead of
+    /// `for .. in iter`) to iterate over the entries to satisfy borrow
+    /// checker.
+    ///
+    /// Note: the method works even if you are scanning over files, but you
+    /// should be careful when chosing when to exit (i.e. check the
+    /// `entry.path().parent()` instead of the `name`)
+    ///
+    /// So to walk over all subdirs in current directory except "target"
+    /// dir (anywhere), you may use this example:
+    ///
+    /// ```rust
+    /// use scan_dir::ScanDir;
+    ///
+    /// ScanDir::dirs().walk(".", |mut iter| {
+    ///     while let Some((entry, name)) = iter.next() {
+    ///         if name == "target" {
+    ///             iter.exit_current_dir();
+    ///         } else {
+    ///             println!("Dir {:?}", entry.path());
+    ///         }
+    ///     }
+    /// }).unwrap();
+    /// ```
+    pub fn exit_current_dir(&mut self) {
+        self.cur = self.stack.pop();
+    }
+}
+
 impl<'a> Iterator for Walker<'a> {
     type Item = (DirEntry, String);
     fn next(&mut self) -> Option<(DirEntry, String)> {
